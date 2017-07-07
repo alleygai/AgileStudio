@@ -1,0 +1,290 @@
+@{
+    ViewBag.Title = "Home Page";
+}
+<div class="row">
+    <div class="col-lg-12"><div id="main" style="height:600px;"></div></div>
+</div>
+<div class="row" style="background:rgb(64, 74, 89);">
+    <div class="col-lg-3"><div id="main1" style="height:450px;"></div></div>
+    <div class="col-lg-3"><div id="main2" style="height:450px;"></div></div>
+    <div class="col-lg-3"><div id="main3" style="height:450px;"></div></div>
+    <div class="col-lg-3"><div id="main4" style="height:450px;"></div></div>
+</div>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+    var geoCoordMap = {
+        'US': [-71.0589, 42.3601],
+        'Ireland': [-9.056790500000034, 53.270668],
+        'India': [77.5946, 12.9716],
+        'China': [116.40739630000007, 39.90419989999999],
+    };
+
+    var USData = [
+        [{ name: 'US' }, { name: 'Ireland', value: 95 }],
+        [{ name: 'US' }, { name: 'India', value: 90 }],
+        [{ name: 'US' }, { name: 'China', value: 80 }]
+    ];
+
+    var IrelandData = [
+        [{ name: 'Ireland' }, { name: 'US', value: 95 }],
+        [{ name: 'Ireland' }, { name: 'India', value: 90 }],
+        [{ name: 'Ireland' }, { name: 'China', value: 80 }]
+    ];
+
+    var IndiaData = [
+        [{ name: 'India' }, { name: 'US', value: 95 }],
+        [{ name: 'India' }, { name: 'Ireland', value: 90 }],
+        [{ name: 'India' }, { name: 'China', value: 80 }]
+    ];
+
+    var ChinaData = [
+        [{ name: 'China' }, { name: 'US', value: 95 }],
+        [{ name: 'China' }, { name: 'Ireland', value: 90 }],
+        [{ name: 'China' }, { name: 'India', value: 80 }]
+    ];
+
+    var planePath = 'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z';
+
+    var convertData = function (data) {
+        var res = [];
+        for (var i = 0; i < data.length; i++) {
+            var dataItem = data[i];
+            var fromCoord = geoCoordMap[dataItem[0].name];
+            var toCoord = geoCoordMap[dataItem[1].name];
+            if (fromCoord && toCoord) {
+                res.push({
+                    fromName: dataItem[0].name,
+                    toName: dataItem[1].name,
+                    coords: [fromCoord, toCoord]
+                });
+            }
+        }
+        return res;
+    };
+
+    var color = ['#a6c84c', '#ffa022', '#46bee9'];
+    var series = [];
+    [['US', USData], ['Ireland', IrelandData], ['India', IndiaData], ['China', ChinaData]].forEach(function (item, i) {
+        series.push({
+            name: item[0] + ' Top10',
+            type: 'lines',
+            zlevel: 1,
+            effect: {
+                show: true,
+                period: 6,
+                trailLength: 0.7,
+                color: '#fff',
+                symbolSize: 3
+            },
+            lineStyle: {
+                normal: {
+                    color: color[i],
+                    width: 0,
+                    curveness: 0.2
+                }
+            },
+            data: convertData(item[1])
+        },
+        {
+            name: item[0] + ' Top10',
+            type: 'lines',
+            zlevel: 2,
+            symbol: ['none', 'arrow'],
+            symbolSize: 10,
+            effect: {
+                show: true,
+                period: 6,
+                trailLength: 0,
+                symbol: planePath,
+                symbolSize: 15
+            },
+            lineStyle: {
+                normal: {
+                    color: color[i],
+                    width: 1,
+                    opacity: 0.6,
+                    curveness: 0.2
+                }
+            },
+            data: convertData(item[1])
+        },
+        {
+            name: item[0] + ' Top10',
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            rippleEffect: {
+                brushType: 'stroke'
+            },
+            label: {
+                normal: {
+                    show: true,
+                    position: 'right',
+                    formatter: '{b}'
+                }
+            },
+            symbolSize: function (val) {
+                return val[2] / 8;
+            },
+            itemStyle: {
+                normal: {
+                    color: color[i]
+                }
+            },
+            data: item[1].map(function (dataItem) {
+                return {
+                    name: dataItem[1].name,
+                    value: geoCoordMap[dataItem[1].name].concat([dataItem[1].value])
+                };
+            })
+        },
+        {
+            name: item[0] + ' Top10',
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            zlevel: 2,
+            rippleEffect: {
+                brushType: 'stroke'
+            },
+            label: {
+                normal: {
+                    show: true,
+                    position: 'right',
+                    formatter: '{b}'
+                }
+            },
+            symbolSize: function (val) {
+                return val[2] / 8;
+            },
+            itemStyle: {
+                normal: {
+                    color: color[i]
+                }
+            },
+            data: item[1].map(function (dataItem) {
+                return {
+                    name: dataItem[1].name,
+                    value: geoCoordMap[dataItem[1].name].concat([dataItem[1].value])
+                };
+            })
+        });
+    });
+
+    var option = {
+        backgroundColor: '#404a59',
+        title: {
+            text: '',
+            subtext: '',
+            left: 'center',
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            orient: 'vertical',
+            top: 'bottom',
+            left: 'right',
+            data: ['北京 Top10', '上海 Top10', '广州 Top10', '广州 Top10'],
+            textStyle: {
+                color: '#fff'
+            },
+            selectedMode: 'single'
+        },
+        geo: {
+            map: 'world',
+            label: {
+                emphasis: {
+                    show: false
+                }
+            },
+            roam: true,
+            itemStyle: {
+                normal: {
+                    areaColor: '#323c48',
+                    borderColor: '#404a59'
+                },
+                emphasis: {
+                    areaColor: '#2a333d'
+                }
+            }
+        },
+        series: series
+    };
+    myChart.setOption(option);
+</script>
+<script type="text/javascript">
+    var myChart1 = echarts.init(document.getElementById('main1'));
+    var myChart2 = echarts.init(document.getElementById('main2'));
+    var myChart3 = echarts.init(document.getElementById('main3'));
+    var myChart4 = echarts.init(document.getElementById('main4'));
+
+    var gaugeoption1 = {
+        tooltip: {
+            formatter: "{a} <br/>{b} : {c}%"
+        },
+        series: [
+            {
+                type: 'gauge',
+                detail: { formatter: '{value}%' },
+                data: [{ value: 50, name: 'United States' }]
+            }
+        ]
+    };
+    var gaugeoption2 = {
+        tooltip: {
+            formatter: "{a} <br/>{b} : {c}%"
+        },
+        series: [
+            {
+                type: 'gauge',
+                detail: { formatter: '{value}%' },
+                data: [{ value: 50, name: 'Ireland' }]
+            }
+        ]
+    };
+    var gaugeoption3 = {
+        tooltip: {
+            formatter: "{a} <br/>{b} : {c}%"
+        },
+        series: [
+            {
+                type: 'gauge',
+                detail: { formatter: '{value}%' },
+                data: [{ value: 50, name: 'India' }]
+            }
+        ]
+    };
+    var gaugeoption4 = {
+        tooltip: {
+            formatter: "{a} <br/>{b} : {c}%"
+        },
+        series: [
+            {
+                type: 'gauge',
+                detail: { formatter: '{value}%' },
+                data: [{ value: 50, name: 'China' }]
+            }
+        ]
+    };
+
+    setInterval(function () {
+        gaugeoption1.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+        myChart1.setOption(gaugeoption1, true);
+    }, 1800);
+    setInterval(function () {
+        gaugeoption2.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+        myChart2.setOption(gaugeoption2, true);
+    }, 1500);
+    setInterval(function () {
+        gaugeoption3.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+        myChart3.setOption(gaugeoption3, true);
+    }, 1200);
+    setInterval(function () {
+        gaugeoption4.series[0].data[0].value = (Math.random() * 100).toFixed(2) - 0;
+        myChart4.setOption(gaugeoption4, true);
+    }, 800);
+
+</script>
